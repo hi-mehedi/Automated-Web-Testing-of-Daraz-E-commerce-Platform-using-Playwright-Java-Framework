@@ -12,8 +12,8 @@ public class CatalogPageTest extends BaseTest {
 
     @Test
     public void testCatalog(){
-        HomePage homePage = new HomePage(page);
-        CatalogPage catalogPage = new CatalogPage(page);
+        HomePage homePage = new HomePage(getPage());
+        CatalogPage catalogPage = new CatalogPage(getPage());
         test.info("Search Product");
         homePage.enterSearchIn(searchP);
         test.info("Click Search");

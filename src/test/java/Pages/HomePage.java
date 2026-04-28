@@ -8,17 +8,17 @@ import com.microsoft.playwright.options.AriaRole;
 public class HomePage {
 
     private Page page;
-    private Locator logInLink;
-    private Locator verifyName;
-    private Locator searchIn;
-    private Locator searchBtn;
+    private final Locator logInLink;
+    private final Locator verifyName;
+    private final Locator searchIn;
+    private final Locator searchBtn;
 
 
     public HomePage(Page page){
         this.page = page;
         this.logInLink = page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Login"));
         this.verifyName = page.locator("#myAccountTrigger");
-        this.searchIn = page.getByRole(AriaRole.SEARCHBOX, new Page.GetByRoleOptions().setName("Search in Daraz"));
+        this.searchIn = page.locator("#q");
         this.searchBtn = page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("SEARCH"));
     }
 

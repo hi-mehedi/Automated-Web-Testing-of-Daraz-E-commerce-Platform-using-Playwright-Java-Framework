@@ -6,7 +6,7 @@ import Pages.HomePage;
 public class HomePageTest extends BaseTest {
 
     public void TestHomePage(){
-        HomePage homePage = new HomePage(page);
+        HomePage homePage = new HomePage(getPage());
         homePage.clickLoginLink();
     }
 }

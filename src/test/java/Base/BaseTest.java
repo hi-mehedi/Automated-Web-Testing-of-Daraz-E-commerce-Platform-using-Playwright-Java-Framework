@@ -1,6 +1,7 @@
 package Base;
 
 import java.lang.reflect.Method;
+import java.util.Properties;
 
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
@@ -15,83 +16,98 @@ import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 
+import Utils.ConfigReader;
 import Utils.ExtentManager;
 import Utils.ScreenshotUtil;
 
 public class BaseTest {
 
-    protected Playwright playwright;
-    protected Browser browser;
-    protected BrowserContext context;
-    protected Page page;
+    protected static ThreadLocal<Playwright> tlPlaywright = new ThreadLocal<>();
+    protected static ThreadLocal<Browser> tlBrowser = new ThreadLocal<>();
+    protected static ThreadLocal<BrowserContext> tlContext = new ThreadLocal<>();
+    protected static ThreadLocal<Page> tlPage = new ThreadLocal<>();
 
+    protected Properties prop;
     protected ExtentReports extent;
     protected ExtentTest test;
 
-    protected final String BASE_URL = "https://www.daraz.com.bd/#?";
-    protected final boolean HEADLESS = false;
-    protected final int SLOW_MO = 0;
-    protected final int DEFAULT_TIMEOUT = 20000;
+    public Page getPage() {
+        return tlPage.get();
+    }
 
     @BeforeMethod
     public void setUp(Method method) {
+        prop = ConfigReader.init_prop();
 
         extent = ExtentManager.getInstance();
         test = extent.createTest(method.getName());
 
-        playwright = Playwright.create();
+        Playwright playwright = Playwright.create();
+        tlPlaywright.set(playwright);
 
-        browser = playwright.chromium().launch(
-                new BrowserType.LaunchOptions()
-                        .setHeadless(HEADLESS)
-                        .setSlowMo(SLOW_MO)
-        );
+        String browserName = prop.getProperty("browser").trim();
+        boolean isHeadless = Boolean.parseBoolean(prop.getProperty("headless"));
+        int slowMo = Integer.parseInt(prop.getProperty("slowmo"));
 
-        context = browser.newContext();
+        Browser browser;
+        switch (browserName.toLowerCase()) {
+            case "chromium":
+                browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(isHeadless).setSlowMo(slowMo));
+                break;
+            case "firefox":
+                browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(isHeadless).setSlowMo(slowMo));
+                break;
+            case "webkit":
+                browser = playwright.webkit().launch(new BrowserType.LaunchOptions().setHeadless(isHeadless).setSlowMo(slowMo));
+                break;
+            default:
+                browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(isHeadless));
+                break;
+        }
+        tlBrowser.set(browser);
 
-        page = context.newPage();
+        BrowserContext context = browser.newContext();
+        tlContext.set(context);
 
-        page.setDefaultTimeout(DEFAULT_TIMEOUT);
+        Page page = context.newPage();
+        tlPage.set(page);
 
-        page.navigate(BASE_URL);
+        int timeout = Integer.parseInt(prop.getProperty("timeout"));
+        page.setDefaultTimeout(timeout);
 
-        test.info("Browser launched and navigated to: " + BASE_URL);
+        String baseURL = prop.getProperty("url");
+        page.navigate(baseURL);
+
+        test.info("Browser (" + browserName + ") launched and navigated to: " + baseURL);
     }
 
     @AfterMethod
     public void tearDown(ITestResult result) {
-
         try {
             if (result.getStatus() == ITestResult.FAILURE) {
-
                 test.fail(result.getThrowable());
-
-                String base64Screenshot = ScreenshotUtil.takeScreenshot(page, result.getName());
-
+                String base64Screenshot = ScreenshotUtil.takeScreenshot(getPage(), result.getName());
                 test.fail("Failure Screenshot",
-                        MediaEntityBuilder
-                                .createScreenCaptureFromBase64String(base64Screenshot)
-                                .build());
-
+                        MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
             } else if (result.getStatus() == ITestResult.SUCCESS) {
-
                 test.pass("Test Passed Successfully");
-
             } else if (result.getStatus() == ITestResult.SKIP) {
-
                 test.skip("Test Skipped");
-
             }
-
         } catch (Exception e) {
-            System.out.println("Error during report generation: " + e.getMessage());
+            System.err.println("Error during report generation: " + e.getMessage());
         }
 
-        extent.flush();
+        if (getPage() != null) getPage().close();
+        if (tlContext.get() != null) tlContext.get().close();
+        if (tlBrowser.get() != null) tlBrowser.get().close();
+        if (tlPlaywright.get() != null) tlPlaywright.get().close();
 
-        if (page != null) page.close();
-        if (context != null) context.close();
-        if (browser != null) browser.close();
-        if (playwright != null) playwright.close();
+        tlPage.remove();
+        tlContext.remove();
+        tlBrowser.remove();
+        tlPlaywright.remove();
+
+        extent.flush();
     }
 }

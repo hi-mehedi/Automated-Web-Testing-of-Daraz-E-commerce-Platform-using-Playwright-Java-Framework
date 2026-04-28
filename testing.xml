@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<suite name="Daraz Suite" parallel="tests" thread-count="3">
+
+    <test name="Login Tests">
+        <classes>
+            <class name="Tests.LoginPageTest"/>
+        </classes>
+    </test>
+
+    <test name="Catalog Tests">
+        <classes>
+            <class name="Tests.CatalogPageTest"/>
+        </classes>
+    </test>
+
+    <test name="Product Purchase Tests">
+        <classes>
+            <class name="Tests.ProductPageTest"/>
+        </classes>
+    </test>
+
+</suite>

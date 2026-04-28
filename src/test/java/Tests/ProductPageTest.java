@@ -24,10 +24,10 @@ public class ProductPageTest extends BaseTest {
 
     @Test(dataProvider = "DarazLoginData")
     public void TestProduct(String emailIn, String pass){
-        HomePage homePage = new HomePage(page);
-        CatalogPage catalogPage = new CatalogPage(page);
-        ProductPage productPage = new ProductPage(page);
-        LoginPage loginPage = new LoginPage(page);
+        HomePage homePage = new HomePage(getPage());
+        CatalogPage catalogPage = new CatalogPage(getPage());
+        ProductPage productPage = new ProductPage(getPage());
+        LoginPage loginPage = new LoginPage(getPage());
         test.info("Click Login Link");
         homePage.clickLoginLink();
         test.info("Enter email");

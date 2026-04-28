@@ -21,8 +21,8 @@ public class LoginPageTest extends BaseTest {
 
     @Test(dataProvider = "DarazLoginData")
     public void TestLoginPage(String emailIn, String pass){
-        HomePage homePage = new HomePage(page);
-        LoginPage loginPage = new LoginPage(page);
+        HomePage homePage = new HomePage(getPage());
+        LoginPage loginPage = new LoginPage(getPage());
         test.info("Click Login Link");
         homePage.clickLoginLink();
         test.info("Enter Email");

@@ -7,7 +7,7 @@ import com.microsoft.playwright.options.AriaRole;
 public class ProductPage {
 
     private Page page;
-    private Locator buyNowBtn;
+    private final Locator buyNowBtn;
 
     public ProductPage(Page page){
         this.page = page;
@@ -15,6 +15,7 @@ public class ProductPage {
     }
 
     public void clickBuyNowBtn(){
+        buyNowBtn.waitFor();
         buyNowBtn.click();
     }
 }

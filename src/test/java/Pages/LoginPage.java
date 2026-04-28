@@ -7,9 +7,9 @@ import com.microsoft.playwright.options.AriaRole;
 public class LoginPage {
 
     private Page page;
-    private Locator email;
-    private Locator password;
-    private Locator logInBtn;
+    private final Locator email;
+    private final Locator password;
+    private final Locator logInBtn;
 
     public LoginPage(Page page){
         this.page = page;
